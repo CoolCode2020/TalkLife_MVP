@@ -10,7 +10,7 @@ public class WordEntry {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String sessionID;
+    private String sessionId;
     private String chineseWord;
     private String pronouncationWord;
     private String englishWord;
