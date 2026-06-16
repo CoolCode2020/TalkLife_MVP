@@ -11,7 +11,7 @@ help:
 	@echo "make db       Open database shell"
 
 up:
-	docker compose up --build -d
+	docker compose up -d
 
 rebuild:
 	docker compose build --no-cache
