@@ -17,12 +17,21 @@ public class TranslationService {
      public TranslationEntry saveText(String originalText) {
         TranslationEntry entry = new TranslationEntry();
         entry.setOriginalText(originalText);
+        entry.LLM
         return translationRepository.save(entry);
 
      }
      public List<TranslationEntry> getAllTranslations() {
         return translationRepository.findAll();
      }
+     public translateEntry(String text, String inputLanguage, String outputLanguage) {
+
+      
+
+      return tranlsation;
+
+     
+      }
 
     
 }

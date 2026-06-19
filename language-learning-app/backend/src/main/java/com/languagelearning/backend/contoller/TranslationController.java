@@ -14,13 +14,9 @@ import java.util.List;
 
 /*
  * Handles incoming HTTP requests from the frontend.
- *
- * The controller should stay lightweight and only:
  * - receive API requests
  * - validate and map request data
  * - delegate business logic to the service layer
- *
- * Business logic should not be implemented here.
  */
 
 @RestController

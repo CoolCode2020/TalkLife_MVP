@@ -10,7 +10,13 @@ services:
       - "5432:5432"
     volumes:
       - talklife_postgres_data:/var/lib/postgresql/data
-
+  ollama:
+      image: ollama/ollama
+      container_name: talklife_ollama
+      ports:
+        - "11434:11434"
+      volumes:
+      - ollama_data:/root/.ollama
   backend:
     build:
       context: ./language-learning-app/backend
@@ -26,7 +32,7 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
-
+      - ollama
   frontend:
     build:
       context: ./language-learning-app/frontend
@@ -38,6 +44,8 @@ services:
       - "5173:5173"
     depends_on:
       - backend
+      - ollama #for Later better speech to text test
 
 volumes:
   talklife_postgres_data:
+  ollama_data:
