@@ -1,24 +1,41 @@
+type SpeechLanguageOption = {
+  language: string;
+  name: string;
+  flag: string;
+};
+
 type TextInputPanelProps = {
   text: string;
   detectedLanguage: string;
+
+  speechLanguage: string;
+  speechLanguageOptions: SpeechLanguageOption[];
+
   isRecording: boolean;
   isSpeechRecognitionSupported: boolean;
 
   onTextChange: (text: string) => void;
+  onSpeechLanguageChange: (language: string) => void;
+
   onStartRecording: () => void;
   onStopRecording: () => void;
-  onClearText: () => void;
 };
 
 export function TextInputPanel({
   text,
   detectedLanguage,
+
+  speechLanguage,
+  speechLanguageOptions,
+
   isRecording,
   isSpeechRecognitionSupported,
+
   onTextChange,
+  onSpeechLanguageChange,
+
   onStartRecording,
   onStopRecording,
-  onClearText,
 }: TextInputPanelProps) {
   const recordingButtonLabel = isRecording
     ? "⏹ Stop"
@@ -30,9 +47,29 @@ export function TextInputPanel({
 
   return (
     <>
+
       <div style={{ marginBottom: "0.5rem" }}>
-        Detected input language:{" "}
-        <strong>{detectedLanguage || "Unknown"}</strong>
+        <label htmlFor="speech-language">
+          Input language:{" "}
+        </label>
+
+        <select
+          id="speech-language"
+          value={speechLanguage}
+          onChange={(event) =>
+            onSpeechLanguageChange(event.target.value)
+          }
+          disabled={isRecording}
+        >
+          {speechLanguageOptions.map((option) => (
+            <option
+              key={option.language}
+              value={option.language}
+            >
+              {option.flag} {option.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <textarea
@@ -40,7 +77,9 @@ export function TextInputPanel({
         cols={50}
         placeholder="Enter text..."
         value={text}
-        onChange={(event) => onTextChange(event.target.value)}
+        onChange={(event) =>
+          onTextChange(event.target.value)
+        }
       />
 
       <div style={{ marginTop: "0.5rem" }}>
@@ -50,15 +89,6 @@ export function TextInputPanel({
           disabled={!isSpeechRecognitionSupported}
         >
           {recordingButtonLabel}
-        </button>
-
-        <button
-          type="button"
-          onClick={onClearText}
-          disabled={!text}
-          style={{ marginLeft: "0.5rem" }}
-        >
-          🗑 Delete
         </button>
       </div>
 

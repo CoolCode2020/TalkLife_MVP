@@ -1,47 +1,54 @@
 import { useEffect, useState } from "react";
+import { useSpeechRecognition } from "@reactuses/core";
 
 import { useTranslation } from "./hooks/useTranslation";
 import { detectInputLanguage } from "./utils/detectInputLanguage";
-import {
-  getCookie,
-  saveSessionCookie,
-} from "./utils/cookies";
+import { getCookie, saveSessionCookie } from "./utils/cookies";
 
 import { TargetLanguageSelector } from "./components/TargetLanguageSelector";
 import { TextInputPanel } from "./components/TextInputPanel";
 import { TranslationResult } from "./components/TranslationResult";
 
+const speechLanguageOptions = [
+  { language: "en-US", name: "English", flag: "🇺🇸" },
+  { language: "zh-CN", name: "中文", flag: "🇨🇳" },
+  { language: "de-DE", name: "Deutsch", flag: "🇩🇪" },
+];
 
 function App() {
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("");
+  const [speechLanguage, setSpeechLanguage] = useState("en-US");
   const [targetLanguage, setTargetLanguage] = useState("");
   const [targetLanguageConfirmed, setTargetLanguageConfirmed] = useState(false);
   const [targetLanguageError, setTargetLanguageError] = useState("");
 
-  const {
-    translation,
-    pronunciation,
-    isLoading,
-    translate,
-  } = useTranslation();
+  const { translation, pronunciation, isLoading, translate } = useTranslation();
 
-  /** Load saved target language from the session cookie when the app starts. */
+  const { isSupported, isListening, result, start, stop } =
+    useSpeechRecognition({
+      continuous: true,
+      interimResults: true,
+      lang: speechLanguage,
+    });
+
   useEffect(() => {
     const savedTargetLanguage = getCookie("targetLanguage");
 
-    if (
-      savedTargetLanguage === "Chinese" ||
-      savedTargetLanguage === "English"
-    ) {
+    if (savedTargetLanguage === "Chinese" || savedTargetLanguage === "English") {
       setTargetLanguage(savedTargetLanguage);
       setTargetLanguageConfirmed(true);
     }
   }, []);
 
-  function handleTargetLanguageChange(
-    language: string,
-  ) {
+  useEffect(() => {
+    if (!result) return;
+
+    setText(result);
+    setLanguage(detectInputLanguage(result));
+  }, [result]);
+
+  function handleTargetLanguageChange(language: string) {
     setTargetLanguage(language);
     setTargetLanguageConfirmed(false);
     setTargetLanguageError("");
@@ -49,22 +56,15 @@ function App() {
 
   function handleConfirmTargetLanguage() {
     if (!targetLanguage) {
-      setTargetLanguageError(
-        "Please choose a target language first.",
-      );
+      setTargetLanguageError("Please choose a target language first.");
       return;
     }
 
-    saveSessionCookie(
-      "targetLanguage",
-      targetLanguage,
-    );
-
+    saveSessionCookie("targetLanguage", targetLanguage);
     setTargetLanguageConfirmed(true);
     setTargetLanguageError("");
   }
 
-  /** Request translation from the backend through the translation hook. */
   async function handleTranslate() {
     if (!targetLanguageConfirmed) {
       setTargetLanguageError(
@@ -74,19 +74,12 @@ function App() {
     }
 
     if (!text.trim()) {
-      setTargetLanguageError(
-        "Please enter text before translating.",
-      );
+      setTargetLanguageError("Please enter text before translating.");
       return;
     }
 
     setTargetLanguageError("");
-
-    await translate(
-      text,
-      language,
-      targetLanguage,
-    );
+    await translate(text, language, targetLanguage);
   }
 
   return (
@@ -96,6 +89,13 @@ function App() {
       <TextInputPanel
         text={text}
         detectedLanguage={language}
+        speechLanguage={speechLanguage}
+        speechLanguageOptions={speechLanguageOptions}
+        isRecording={isListening}
+        isSpeechRecognitionSupported={isSupported}
+        onSpeechLanguageChange={setSpeechLanguage}
+        onStartRecording={start}
+        onStopRecording={stop}
         onTextChange={(newText) => {
           setText(newText);
           setLanguage(detectInputLanguage(newText));
@@ -116,17 +116,13 @@ function App() {
       <br />
       <br />
 
-      <button
-        onClick={handleTranslate}
-        disabled={isLoading}
-      >
-        {isLoading
-          ? "Translating..."
-          : "Translate"}
+      <button onClick={handleTranslate} disabled={isLoading}>
+        {isLoading ? "Translating..." : "Translate"}
       </button>
 
       <br />
       <br />
+
       <TranslationResult
         translation={translation}
         pronunciation={pronunciation}
