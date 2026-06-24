@@ -1,17 +1,28 @@
 import type {
-
+  ApiErrorResponse,
   TranslationRequest,
-
   TranslationResponse,
-
 } from "../types/types.ts";
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080";
+
+export class TranslationApiError extends Error {
+  status?: number;
+  fieldErrors?: Record<string, string>;
+
+  constructor(message: string, status?: number, fieldErrors?: Record<string, string>) {
+    super(message);
+    this.name = "TranslationApiError";
+    this.status = status;
+    this.fieldErrors = fieldErrors;
+  }
+}
 
 export async function createTranslation(
   payload: TranslationRequest
 ): Promise<TranslationResponse> {
-
   const response = await fetch(
-    "http://localhost:8080/api/translations",
+    `${API_BASE_URL}/api/translations`,
     {
       method: "POST",
       headers: {
@@ -22,10 +33,33 @@ export async function createTranslation(
   );
 
   if (!response.ok) {
-    throw new Error(
-  `Translation request failed with status ${response.status}`
-);
+    throw await buildApiError(response);
   }
 
-return await response.json() as TranslationResponse;
+  return await response.json() as TranslationResponse;
+}
+
+async function buildApiError(response: Response) {
+  try {
+    const errorResponse = await response.json() as ApiErrorResponse;
+
+    if (import.meta.env.DEV) {
+      console.debug("Translation API error", errorResponse);
+    }
+
+    return new TranslationApiError(
+      errorResponse.message,
+      errorResponse.status,
+      errorResponse.fieldErrors,
+    );
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.debug("Unable to parse translation API error", error);
+    }
+
+    return new TranslationApiError(
+      `Translation request failed with status ${response.status}`,
+      response.status,
+    );
+  }
 }

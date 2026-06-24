@@ -15,15 +15,31 @@ const speechLanguageOptions = [
   { language: "de-DE", name: "Deutsch", flag: "🇩🇪" },
 ];
 
+function getSavedTargetLanguage() {
+  const savedTargetLanguage = getCookie("targetLanguage");
+
+  if (
+    savedTargetLanguage === "Chinese" ||
+    savedTargetLanguage === "English" ||
+    savedTargetLanguage === "German"
+  ) {
+    return savedTargetLanguage;
+  }
+
+  return "";
+}
+
 function App() {
   const [text, setText] = useState("");
   const [language, setLanguage] = useState("");
   const [speechLanguage, setSpeechLanguage] = useState("en-US");
-  const [targetLanguage, setTargetLanguage] = useState("");
-  const [targetLanguageConfirmed, setTargetLanguageConfirmed] = useState(false);
+  const [targetLanguage, setTargetLanguage] = useState(getSavedTargetLanguage);
+  const [targetLanguageConfirmed, setTargetLanguageConfirmed] = useState(
+    () => Boolean(getSavedTargetLanguage()),
+  );
   const [targetLanguageError, setTargetLanguageError] = useState("");
 
-  const { translation, pronunciation, isLoading, translate } = useTranslation();
+  const { translation, pronunciation, error, isLoading, translate } = useTranslation();
 
   const { isSupported, isListening, result, start, stop } =
     useSpeechRecognition({
@@ -33,17 +49,10 @@ function App() {
     });
 
   useEffect(() => {
-    const savedTargetLanguage = getCookie("targetLanguage");
-
-    if (savedTargetLanguage === "Chinese" || savedTargetLanguage === "English") {
-      setTargetLanguage(savedTargetLanguage);
-      setTargetLanguageConfirmed(true);
-    }
-  }, []);
-
-  useEffect(() => {
     if (!result) return;
 
+    // The speech-recognition hook exposes browser speech results as external state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setText(result);
     setLanguage(detectInputLanguage(result));
   }, [result]);
@@ -119,6 +128,12 @@ function App() {
       <button onClick={handleTranslate} disabled={isLoading}>
         {isLoading ? "Translating..." : "Translate"}
       </button>
+
+      {error && (
+        <p style={{ color: "red", marginTop: "1rem" }}>
+          {error}
+        </p>
+      )}
 
       <br />
       <br />

@@ -1,82 +1,115 @@
-Project Description
+# TalkLife MVP
 
-AI-Powered Language Learning App
+TalkLife is an early MVP for language learning through spoken or typed input. The first product loop is:
 
-This project is a language learning application originally inspired by a personal goal: helping my wife learn German while I learn Chinese. The app focuses on interactive, AI-assisted language acquisition through realistic conversations, personalized exercises, and adaptive learning paths.
+1. Speak or type a sentence.
+2. Translate it.
+3. Extract useful vocabulary.
+4. Save selected words as study cards.
+5. Review due cards with spaced repetition.
 
-The frontend is built with TypeScript, providing a modern and responsive user experience. The backend is developed using Java and Spring Boot, exposing REST APIs, managing user progress, authentication, and learning content. AI features are integrated to enable conversational practice, grammar correction, vocabulary training, pronunciation feedback, and personalized lesson generation.
+## Current Status
 
-Key features include:
+Implemented:
 
-* AI-powered conversation practice
-* Personalized vocabulary and grammar exercises
-* Progress tracking and learning analytics
-* Support for multiple languages, including German and Chinese
-* Adaptive difficulty based on user performance
-* User authentication and profile management
-* Responsive web interface built with TypeScript
+- React and TypeScript frontend with speech input support.
+- Spring Boot backend with a translation API.
+- PostgreSQL database via Docker Compose.
+- Translation request and response DTOs.
+- Ollama-backed translation service.
+- Backend validation and structured API error responses.
+- Safe backend logs for translation requests without logging spoken text.
+- Frontend API error handling and dev-only debug logging.
+- Configurable frontend API URL with `VITE_API_BASE_URL`.
+- Configurable backend CORS origins with `app.cors.allowed-origins`.
 
-The goal of the project is to create a more engaging and effective language learning experience than traditional flashcard-based apps by leveraging modern AI technologies and interactive learning methods.
+Not implemented yet:
 
-Tech Stack
+- Vocabulary extraction.
+- Study card database and review flow.
+- Grammar lessons.
+- Authentication and user profiles.
+- Progress tracking.
 
-* Frontend: TypeScript (Angular/React/etc.)
-* Backend: Java, Spring Boot
-* Database: (e.g. PostgreSQL/MySQL)
-* Authentication: Spring Security, JWT
-* AI Integration: OpenAI API / LLM services
-* Deployment: Docker, Cloud Hosting
+## Tech Stack
 
+- Frontend: React, TypeScript, Vite.
+- Backend: Java 21, Spring Boot.
+- Database: PostgreSQL.
+- Local orchestration: Docker Compose.
+- Planned AI integration: Ollama locally first, OpenAI later if needed.
 
+## Local Development
 
+Start infrastructure and services:
 
+```sh
+make up
+```
 
-Frontend: Next.js + TypeScript
+Frontend only:
 
-Spring Boot
+```sh
+cd language-learning-app/frontend
+npm install
+npm run dev
+```
 
-AI worker: Python + FastAPI
+Backend only:
 
-Database: Supabase Postgres + pgvector
+```sh
+cd language-learning-app/backend
+./mvnw spring-boot:run
+```
 
-Queue/cache: Redis
+## Configuration
 
-Local dev: Docker Compose
+Frontend:
 
-CI/CD: GitHub Actions
+```sh
+VITE_API_BASE_URL=http://localhost:8080
+```
 
-Deployment: Fly.io or Railway first
+Backend:
 
+```properties
+app.cors.allowed-origins=http://localhost:5173,http://127.0.0.1:5173
+app.ai.ollama.base-url=http://localhost:11434
+app.ai.ollama.model=translategemma:latest
+```
 
-Next.js
+Docker Compose overrides the backend datasource URL so the backend can reach the `postgres` service inside Docker.
+It also sets the Ollama base URL to `http://ollama:11434`. To use a different local model, set `OLLAMA_MODEL` before starting Docker Compose:
 
-   ↓
+```sh
+OLLAMA_MODEL=qwen2.5:7b make up
+```
 
-Spring Boot
+## Quality Checks
 
-   ↓
+Frontend:
 
-PostgreSQL
+```sh
+cd language-learning-app/frontend
+npm run lint
+npm run build
+```
 
-Python AI Service
+Backend:
 
-   ↓
+```sh
+cd language-learning-app/backend
+./mvnw test
+```
 
-Ollama / OpenAI
+## Next Milestones
 
-Redis
+Phase 3:
 
-   ↓
+- Add a study card database model with `dueDate`, `interval`, `ease`, and `reviewCount`.
+- Add endpoints for creating cards, listing due cards, and reviewing cards.
 
-queues/cache
+Phase 4:
 
-Docker Compose
-
-   ↓
-
-orchestrates everything
-
-
-
-
-
+- Add vocabulary extraction from translated sentences.
+- Let users choose which words become study cards.

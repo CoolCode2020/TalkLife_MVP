@@ -27,7 +27,7 @@ export function TargetLanguageSelector({
         <option value="">Choose language...</option>
         <option value="Chinese">Chinese/Chinesisch/中文</option>
         <option value="English">English/Englisch/英语</option>
-        <option value="English">German/Deutsch/德语</option>
+        <option value="German">German/Deutsch/德语</option>
       </select>
 
       <button

@@ -25,6 +25,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/talklife_db
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
+      APP_AI_OLLAMA_BASE_URL: http://ollama:11434
+      APP_AI_OLLAMA_MODEL: ${OLLAMA_MODEL:-translategemma:latest}
     volumes:
     - ./language-learning-app/backend:/app
     - /app/.m2

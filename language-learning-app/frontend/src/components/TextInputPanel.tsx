@@ -82,6 +82,12 @@ export function TextInputPanel({
         }
       />
 
+      {detectedLanguage && (
+        <p style={{ marginTop: "0.5rem" }}>
+          Detected language: {detectedLanguage}
+        </p>
+      )}
+
       <div style={{ marginTop: "0.5rem" }}>
         <button
           type="button"

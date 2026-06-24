@@ -5,6 +5,7 @@ import { createTranslation } from "../api/translationAPI";
 export function useTranslation() {
   const [translation, setTranslation] = useState("");
   const [pronunciation, setPronunciation] = useState("");
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   async function translate(
@@ -13,6 +14,7 @@ export function useTranslation() {
     targetLanguage: string,
   ) {
     setIsLoading(true);
+    setError("");
 
     try {
       const translationResponse =
@@ -29,6 +31,18 @@ export function useTranslation() {
       setPronunciation(
         translationResponse.pronunciation,
       );
+    } catch (translationError) {
+      const message = translationError instanceof Error
+        ? translationError.message
+        : "Translation failed. Please try again.";
+
+      if (import.meta.env.DEV) {
+        console.debug("Translation request failed", translationError);
+      }
+
+      setTranslation("");
+      setPronunciation("");
+      setError(message);
     } finally {
       setIsLoading(false);
     }
@@ -37,6 +51,7 @@ export function useTranslation() {
   return {
     translation,
     pronunciation,
+    error,
     isLoading,
     translate,
   };
